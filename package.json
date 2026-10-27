@@ -17,7 +17,8 @@
     "swa:deploy": "azd deploy",
     "swa:up": "azd up",
     "swa:deploy:script": "pwsh -File ./scripts/deploy-swa.ps1",
-    "test": "yarn api:test"
+    "test": "yarn api:test",
+    "test:scenarios": "jest --config jest.config.js"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Family health vault — school forms, ready in 10 seconds</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 2rem 1rem 4rem;
+        background: #f7f8fb;
+        color: #10203a;
+      }
+      main {
+        max-width: 44rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 1.9rem;
+        line-height: 1.2;
+      }
+      .lede {
+        font-size: 1.05rem;
+        color: #3c4a60;
+      }
+      .tiers {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        margin: 1.5rem 0;
+      }
+      .tier {
+        background: #fff;
+        border: 2px solid #d5dbe7;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        cursor: pointer;
+      }
+      .tier.is-selected {
+        border-color: #1f5fd0;
+        box-shadow: 0 0 0 2px rgba(31, 95, 208, 0.18);
+      }
+      .tier h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.25rem;
+      }
+      .price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+      }
+      .price small {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: #56637a;
+      }
+      ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: #3c4a60;
+      }
+      form {
+        background: #fff;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid #d5dbe7;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      input[type="email"] {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #b9c2d4;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 0.75rem;
+        width: 100%;
+        padding: 0.7rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: #1f5fd0;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #9aa7bd;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 0.75rem;
+        font-size: 0.95rem;
+      }
+      .status[data-state="error"] {
+        color: #b3261e;
+      }
+      .status[data-state="ok"] {
+        color: #1b6b3a;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Your child's health documents, organized and shareable in 10 seconds.</h1>
+      <p class="lede">
+        QR-share a form at the school office or a clinic without digging through
+        email. Built for parents of school-age children in the UK, Ireland and
+        Australia.
+      </p>
+
+      <section class="tiers" id="tiers" aria-label="Pricing tiers">
+        <article class="tier" data-tier="free">
+          <h2>Free</h2>
+          <p class="price">£0 <small>/ month</small></p>
+          <ul>
+            <li>1 child</li>
+            <li>Up to 10 documents</li>
+          </ul>
+        </article>
+        <article class="tier" data-tier="basic">
+          <h2>Vault Basic</h2>
+          <p class="price">£2.99 <small>/ month</small></p>
+          <ul>
+            <li>Unlimited children</li>
+            <li>Offline vault</li>
+          </ul>
+        </article>
+        <article class="tier" data-tier="plus">
+          <h2>Vault Plus</h2>
+          <p class="price">£4.99 <small>/ month</small></p>
+          <ul>
+            <li>QR share</li>
+            <li>Immunisation alerts</li>
+          </ul>
+        </article>
+      </section>
+
+      <form id="waitlist" novalidate>
+        <p><strong>Choose a tier, then join the waitlist for early access.</strong></p>
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+        <input type="hidden" id="tier" name="tier" value="" />
+        <button type="submit" id="submit" disabled>Join the waitlist</button>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+    <script>
+      // The experiment in issue #1622 requires an explicit tier choice at sign-up.
+      var selectedTier = '';
+      var submitButton = document.getElementById('submit');
+      var tierInput = document.getElementById('tier');
+      var status = document.getElementById('status');
+      var visitorId = 'visitor-' + Math.random().toString(36).slice(2);
+
+      // Count one unique visit for the landing-page conversion denominator.
+      fetch('/api/experiments/family-health-vault/visits', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ visitorId: visitorId, channel: 'landing-page' })
+      }).catch(function () {
+        /* traffic tracking is best-effort */
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('.tier'), function (card) {
+        card.addEventListener('click', function () {
+          selectedTier = card.getAttribute('data-tier') || '';
+          tierInput.value = selectedTier;
+          Array.prototype.forEach.call(document.querySelectorAll('.tier'), function (other) {
+            other.classList.toggle('is-selected', other === card);
+          });
+          submitButton.disabled = selectedTier === '';
+        });
+      });
+
+      document.getElementById('waitlist').addEventListener('submit', function (event) {
+        event.preventDefault();
+        status.removeAttribute('data-state');
+        status.textContent = '';
+
+        if (!selectedTier) {
+          status.setAttribute('data-state', 'error');
+          status.textContent = 'Please choose a pricing tier before joining the waitlist.';
+          return;
+        }
+
+        fetch('/api/experiments/family-health-vault/signups', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            tier: selectedTier,
+            channel: 'landing-page',
+            visitorId: visitorId
+          })
+        })
+          .then(function (response) {
+            return response.json().then(function (payload) {
+              return { status: response.status, payload: payload };
+            });
+          })
+          .then(function (result) {
+            if (result.status === 200) {
+              status.setAttribute('data-state', 'ok');
+              status.textContent = 'You are on the waitlist. We will email you when early access opens.';
+              return;
+            }
+            status.setAttribute('data-state', 'error');
+            status.textContent =
+              (result.payload && result.payload.message) || 'Something went wrong. Please try again.';
+          })
+          .catch(function () {
+            status.setAttribute('data-state', 'error');
+            status.textContent = 'Network error. Please try again.';
+          });
+      });
+    </script>
+  </body>
+</html>
