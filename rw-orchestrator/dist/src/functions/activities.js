@@ -106,7 +106,7 @@ df.app.activity("ClaimIssueActivity", {
 df.app.activity("DispatchWorkflowActivity", {
     handler: async (input) => {
         const github = await githubClient_1.GitHubClient.create();
-        const ref = process.env.GITHUB_WORKFLOW_REF ?? "main";
+        const ref = process.env.RW_WORKFLOW_DISPATCH_REF ?? "main";
         const cooldownMs = getDispatchCooldownMs();
         if (cooldownMs > 0) {
             const comments = await github.listIssueComments(input.owner, input.repo, input.issueNumber, 50);
