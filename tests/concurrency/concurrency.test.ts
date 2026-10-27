@@ -1,0 +1,8 @@
+/**
+ * SCENARIO_CONCURRENCY_RACE (concurrency)
+ *
+ * Repository-level entry point for the concurrency scenario. The scenario
+ * implementation lives next to the api workspace module it covers; this file
+ * exposes it at the canonical `tests/concurrency` path.
+ */
+import '../../api/src/__tests__/medicalBilling/concurrency.test';
