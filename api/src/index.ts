@@ -5,3 +5,4 @@ import './functions/issueDetails';
 import './functions/retryIssue';
 import './functions/retryBatch';
 import './functions/refreshCache';
+import './functions/experimentWaitlist';
